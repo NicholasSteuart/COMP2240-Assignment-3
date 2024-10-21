@@ -26,20 +26,6 @@ public class Frame
     {
         this.process = process;
     }
-    // METHODS //
-
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
-    public void updateLRUTime()
-    {
-        lruTime++; 
-    }
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
-    public void resetLRUTime()
-    {
-        lruTime = 0;
-    }
     
     // MUTATORS //
     
@@ -48,6 +34,12 @@ public class Frame
     public void setPageID(int pageID)
     {
         this.pageID = pageID;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public void setLRUTime(int lruTime)
+    {
+        this.lruTime = lruTime;
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 

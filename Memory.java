@@ -78,21 +78,34 @@ public class Memory
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public boolean isPageInMemory(int pageID, Process process)
+    public boolean isPageInMemory(int pageID, Process process, boolean isGlobal)
     {
-        for(Frame frame : frames)
+        if(!isGlobal)   //Local Scope
         {
-            if(frame.getPageID() == pageID && frame.getProcess() == process)
+            for(Frame frame : frames)
             {
-                return true;    //Page is loaded in Memory
+                if(frame.getPageID() == pageID && frame.getProcess() == process)    //Check if the Page is loaded in it's statically allocated Frames 
+                {
+                    return true;    //Page is loaded in Memory
+                }
+            }
+        }
+        else
+        {
+            for(Frame frame : frames)
+            {
+                if(frame.getPageID() == pageID) //Only need to check if globally the page is loaded in main memory
+                {
+                    return true;    //Page is loaded in Memory
+                }
             }
         }
 
         return false; //Page Fault
     }
     //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
-    public void addPage(int pageID, Process process, boolean isGlobal)
+    //POST-CONDITION: Either demand paging has executed in terms of a local or global scope design OR a page replacement has been called
+    public void addPage(int pageID, Process process, int time, boolean isGlobal)
     {
         boolean pageAdded = false;              //Stores whether or demand paging was successful or false if a page needs to be replaced
         
@@ -106,6 +119,7 @@ public class Memory
                 if(frames.get(i).getPageID() == 0)
                 {
                     frames.get(i).setPageID(pageID);
+                    frames.get(i).setLRUTime(time);
                     pageAdded = true;
                     break;
                 }
@@ -118,6 +132,7 @@ public class Memory
                 if(frame.getPageID() == 0)
                 {
                     frame.setPageID(pageID);
+                    frame.setLRUTime(time);
                     pageAdded = true;
                     break;
                 }
@@ -131,46 +146,73 @@ public class Memory
         }
     }
 
-    // TODO: REWRITE THIS //
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
     public void lruReplacePage(Process process, int pageID, boolean isGlobal)
     {
-        Frame lruFrame = null;
+        int lruTime; //Stores the least recently used Frame time
+        int lruPagePos = 0;              //Stores the position of the least recently used Page in main memory
 
         //Find Least Recently Used Page in Main Memory 
         if(!isGlobal)   //Check frames allocated to the Process for a replacement (Local Scope)
         {
-            for(Frame frame : frames)
+            int mainMemPos = process.getOffset();
+            lruTime = frames.get(mainMemPos).getLRUTime();
+
+            for(int i = mainMemPos; i < process.getMaxFrames(); i++)
             {
-                if(frame.getProcess() == process && lruFrame == null)
+                if(frames.get(i).getLRUTime() < lruTime && frames.get(i).getLRUTime() != 0)
                 {
-                    lruFrame = frame;
-                }
-                else if(frame.getProcess() == process && lruFrame != null)
-                {
-                    if(frame.getLRUTime() > lruFrame.getLRUTime())
-                    {
-                        lruFrame = frame;
-                    }
+                    lruTime = frames.get(i).getLRUTime();
+                    lruPagePos = i;
                 }
             }
+
         }
         else    //Check all frames for potential replacement (Global scope)
         {
-            lruFrame = frames.get(0);
+            lruTime = Integer.MAX_VALUE;
+
             for(Frame frame : frames)
             {
-                if(frame.getLRUTime() > lruFrame.getLRUTime())
+                if(frame.getLRUTime() < lruTime && frame.getLRUTime() != 0)
                 {
-                    lruFrame = frame;
+                    lruTime = frame.getLRUTime();
+                    lruPagePos = frames.indexOf(frame);
                 }
             }
         }
-        //Swap the LRU page out and the new page in
-        lruFrame.setPageID(pageID);
-        lruFrame.setProcess(process);
+        //Swap the LRU page out and the new page in. TODO: ASK NASIMUL ABOUT THIS
+        frames.get(lruPagePos).setPageID(pageID);
+        frames.get(lruPagePos).setProcess(process);
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION:
+    public void updateLRUTime(Process process, int pageID, int time, boolean isGlobal)
+    {
+        if(!isGlobal)   //Local Scope
+        {
+            int mainMemPos = process.getOffset();
 
+            for(int i = mainMemPos; i < process.getMaxFrames(); i++)
+            {
+                if(frames.get(i).getPageID() == pageID)
+                {
+                    frames.get(i).setLRUTime(time);
+                    break;
+                }
+            }
+        }
+        else    //Global Scope
+        {
+            for(Frame frame : frames)
+            {
+                if(frame.getPageID() == pageID)
+                {
+                    frame.setLRUTime(time);
+                }
+            }
+        }
     }
 
     // ACCESSORS //

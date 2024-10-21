@@ -14,8 +14,8 @@ public class Scheduler
     // CLASS VARIABLES //
 
     private ArrayList<Process> readyQueue;      //Ready Queue of Processes
-    private ArrayList<Process> blockedQueue;    //Blocked Queue of Processes
-    private ArrayList<Process> finishedQueue;   //Finished Queue of Processes
+    private ArrayList<Process> blockedQueue = new ArrayList<>();    //Blocked Queue of Processes
+    private ArrayList<Process> finishedQueue = new ArrayList<>();   //Finished Queue of Processes
     private int timer = 0;                       //The global time of the simulation as it runs
     private int timeSlice;                      //Quantum of time that a Process is allowed to run for before having to swap
     private Memory memory;                      //Memory the Scheduler has access to
@@ -69,13 +69,14 @@ public class Scheduler
                 {
                     int pageNeeded = runningProcess.getPageRequests().get(runningProcess.getCurrentPage()); //The Page that the Process requires now
     
-                    if(!memory.isPageInMemory(pageNeeded, runningProcess))  //IF the Page required by the Process is not loaded in main memory, the interrupt routine runs 
+                    if(!memory.isPageInMemory(pageNeeded, runningProcess, isGlobal))  //IF the Page required by the Process is not loaded in main memory, the interrupt routine runs 
                     {
                         handlePageFault(pageNeeded, runningProcess);    //Interrupt Routine
                         break;                                          //Running Process is blocked so it's alloited time slice expires
                     }
                     else    //Process executes 1 unit of it's time slice
                     {
+                        memory.updateLRUTime(runningProcess, pageNeeded, timer, isGlobal);
                         runningProcess.setCurrentPage(runningProcess.getCurrentPage() + 1); //Set the Process's next Page required to execute 
                         timer++;                                                            //Increase time
                         checkBlocked();                                                     //Check to see if a Process has become unblocked
@@ -99,8 +100,8 @@ public class Scheduler
     {
         for(Process process : blockedQueue)
         {
-            process.setBlockedTime(process.getBlockedTime() + 1);   //Increment the time spent swapping
-            if(process.getBlockedTime() == 4)                       //IF the Process has finished swapping
+            process.setBlockedTime(process.getBlockedTime() - 1);   //Increment the time spent swapping
+            if(process.getBlockedTime() == 0)                       //IF the Process has finished swapping
             {
                 readyQueue.add(process);                            //Move the Process back to the Ready queue
                 blockedQueue.remove(process);
@@ -111,10 +112,11 @@ public class Scheduler
     //POST-CONDITION:
     public void handlePageFault(int pageNeeded, Process process)
     {
-        process.addPageFault(timer);    //Add a Page Fault Time to the Process
-        blockedQueue.add(process);      //Move the Process to the Blocked queue
+        process.setBlockedTime(4);  //Process blocks for 4 time units
+        process.addPageFault(timer);            //Add a Page Fault Time to the Process
+        blockedQueue.add(process);              //Move the Process to the Blocked queue
         readyQueue.remove(process);
-        memory.addPage(pageNeeded, process, isGlobal);   //Allocate the Page to main memory
+        memory.addPage(pageNeeded, process, timer, isGlobal);   //Allocate the Page to main memory
     }
 
     // ACCESSORS //

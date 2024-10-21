@@ -33,7 +33,7 @@ public class Process
     {
         name = "";
         id = 0;
-        pageRequests = null;
+        pageRequests = new ArrayList<>();
         currentPage = 0;
     }
     //PRE-CONDITION: No pre-conditions

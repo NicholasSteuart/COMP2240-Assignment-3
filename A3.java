@@ -54,7 +54,9 @@ public class A3
                     }
                 }
                 processList1.add(new Process(name, id, pageRequests));
+                System.out.println(processList1.get(0).getPageRequests());
                 processList2.add(new Process(name, id, pageRequests));
+                System.out.println(processList2.get(0).getPageRequests());
                 pageRequests.clear();
                 sc.close();
             }
@@ -66,6 +68,9 @@ public class A3
 
         Scheduler scheduler1 = new Scheduler(processList1, timeSlice, new Memory(totalFrames), false);
         Scheduler scheduler2 = new Scheduler(processList2, timeSlice, new Memory(totalFrames), true);
+
+        scheduler1.run();
+        scheduler2.run();
 
         System.out.println(printResults(scheduler1));
         System.out.println("----------------------------------------------------------\n");
