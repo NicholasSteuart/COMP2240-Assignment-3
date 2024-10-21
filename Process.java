@@ -15,13 +15,15 @@ public class Process
 {
     // CLASS VARIABLES //
 
-    private String name;                            //The Process's Name
-    private int id;                                 //The Process's ID
-    private int turnTime = 0;                       //Turnaround Time of the Process
-    private ArrayList<Integer> pageRequests;        //The pages requested by the Process
-    private int currentPage;
+    private String name;                                        //The Process's Name
+    private int id;                                             //The Process's ID
+    private int turnTime = 0;                                   //Turnaround Time of the Process
+    private ArrayList<Integer> pageRequests;                    //The pages requested by the Process
+    private int currentPage;                                    //What Page Request the Process is upto
     private ArrayList<Integer> pageFaults = new ArrayList<>();  //List of Page Faults times that occur doing the Process's Lifetime
-    private int framesAllocated = 0;                //Frames allocated to the Process by the Memory
+    private int offset;                                         //The position in the main memory where the frames assigned to the Process starts. Only used for Static Allocation
+    private int maxFrames;                                      //Total Frames allowed to be allocated to a Process. Only used for Static Allocation
+    private int blockedTime = 0;                                //The time spent by the Process blocked
 
     // CONSTRUCTORS //
     
@@ -54,16 +56,6 @@ public class Process
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public int nextPage()
-    {
-        if(currentPage < pageRequests.size())
-        {
-            return pageRequests.get(currentPage++);
-        }
-        return -1;  //No more page requests left
-    }
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
     public boolean isFinished()
     {
         return currentPage >= pageRequests.size();
@@ -79,9 +71,27 @@ public class Process
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public void setFramesAllocated(int framesAllocated)
+    public void setCurrentPage(int currentPage)
     {
-        this.framesAllocated = framesAllocated;
+        this.currentPage = currentPage;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public void setOffset(int offset)
+    {
+        this.offset = offset;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public void setMaxFrames(int maxFrames)
+    {
+        this.maxFrames = maxFrames;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public void setBlockedTime(int blockedTime)
+    {
+        this.blockedTime = blockedTime;
     }
 
     // ACCESSORS //
@@ -106,20 +116,44 @@ public class Process
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
+    public int getCurrentPage()
+    {
+        return currentPage;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
     public ArrayList<Integer> getPageRequests()
     {
         return pageRequests;
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public ArrayList<Integer> getPageFaults()
+    public int getTotalPageFaults()
+    {
+        return pageFaults.size();
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public ArrayList<Integer> getFaultTimes()
     {
         return pageFaults;
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public int getFramesAllocated()
+    public int getOffset()
     {
-        return framesAllocated;
+        return offset;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public int getMaxFrames()
+    {
+        return maxFrames;
+    }
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public int getBlockedTime()
+    {
+        return blockedTime;
     }
 }

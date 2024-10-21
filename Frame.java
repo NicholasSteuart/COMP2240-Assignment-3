@@ -8,8 +8,8 @@ public class Frame
 {
     // CLASS VARIABLES //
 
-    private int pageID;         //Page loaded into the Frame
-    private int lruTime = 0;        //Stores the last time the Page was accessed
+    private int pageID = 0;         //Page loaded into the Frame
+    private int lruTime = 0;    //Stores the last time the Page was accessed
     private Process process;    //Stores the Process which currently owns the Page allocated to the Frame
 
     // CONSTRUCTOR //
@@ -18,14 +18,12 @@ public class Frame
     //POST-CONDITION: 
     public Frame()
     {
-        pageID = 0;
         process = null;
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public Frame(int pageID, Process process)
+    public Frame(Process process)
     {
-        this.pageID = pageID;
         this.process = process;
     }
     // METHODS //
