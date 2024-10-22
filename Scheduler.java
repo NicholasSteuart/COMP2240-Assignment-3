@@ -8,6 +8,7 @@
 // PACKAGES //
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Scheduler
 {
@@ -51,15 +52,26 @@ public class Scheduler
     public void run()
     {
         memory.allocateMemory(readyQueue, isGlobal);
+        for(Process process : readyQueue)
+        {
+            System.out.println("PROCESS: " + process.getName() + " PROCESS_ID: " + process.getID() + " PAGE REQUESTS: " + process.getPageRequests());
+        }
         int totalProcesses = readyQueue.size();
 
-        while(finishedQueue.size() != totalProcesses)
+        while(finishedQueue.size() < totalProcesses)
         {
+            System.out.println("READY QUEUE:");
+            for(Process process : readyQueue)
+            {
+                System.out.println("PROCESS: " + process.getID());
+            }
             //IF no Processes are able to run
             if(readyQueue.isEmpty())
             {
-                timer++;    //Increase the Timer
+                System.out.println("READY_QUEUE_EMPTY");
                 checkBlocked(); //Check to see if a Process has become unblocked
+                timer++;    //Increase the Timer
+
             }
             else
             {
@@ -67,28 +79,42 @@ public class Scheduler
 
                 for(int i = 0; i < timeSlice; i++)
                 {
-                    int pageNeeded = runningProcess.getPageRequests().get(runningProcess.getCurrentPage()); //The Page that the Process requires now
-    
+                    int pageNeeded = runningProcess.getCurrentPage(); //The Page that the Process requires now
+                    System.out.println("TIME: " + timer + " RUNNING_PROCESS: " + runningProcess.getID() + " CURRENT_PAGE: " + runningProcess.getCurrentPage() + " PAGE_NEEDED: " + pageNeeded + " OFFSET: " + runningProcess.getOffset());
                     if(!memory.isPageInMemory(pageNeeded, runningProcess, isGlobal))  //IF the Page required by the Process is not loaded in main memory, the interrupt routine runs 
                     {
+                        System.out.println("PAGE FAULT");
                         handlePageFault(pageNeeded, runningProcess);    //Interrupt Routine
                         break;                                          //Running Process is blocked so it's alloited time slice expires
                     }
                     else    //Process executes 1 unit of it's time slice
                     {
                         memory.updateLRUTime(runningProcess, pageNeeded, timer, isGlobal);
-                        runningProcess.setCurrentPage(runningProcess.getCurrentPage() + 1); //Set the Process's next Page required to execute 
                         timer++;                                                            //Increase time
                         checkBlocked();                                                     //Check to see if a Process has become unblocked
                         //Check to see if the running Process has finished 
+                        System.out.println("CURRENT_PAGE_POSITION: " + runningProcess.getPos() + " NEXT PAGE REQUIRED: " + runningProcess.getCurrentPage());
                         if(runningProcess.isFinished())
                         {
+                            System.out.println("PROCESS " + runningProcess.getID() + " HAS FINISHED");
                             runningProcess.setTurnTime(timer);  //Set Turnaround Time of the Process
                             //Move the Process to the finished queue
                             finishedQueue.add(runningProcess);  
                             readyQueue.remove(runningProcess);
+                            break;
                         }
+                        if(i == timeSlice - 1)
+                        {
+                            readyQueue.add(runningProcess);
+                            readyQueue.remove(0);
+                        }
+                        runningProcess.nextPage();                                          //Set the Process's next Page required to execute 
                     }
+                }
+                System.out.println("FINISHED_QUEUE");
+                for(Process process : finishedQueue)
+                {
+                    System.out.println("PROCESS: " + process.getID());
                 }
             }
         }
@@ -100,13 +126,19 @@ public class Scheduler
     {
         for(Process process : blockedQueue)
         {
+            System.out.println("BLOCKED: " + process.getID() + " BLOCK_TIME: " + process.getBlockedTime());
             process.setBlockedTime(process.getBlockedTime() - 1);   //Increment the time spent swapping
-            if(process.getBlockedTime() == 0)                       //IF the Process has finished swapping
-            {
-                readyQueue.add(process);                            //Move the Process back to the Ready queue
-                blockedQueue.remove(process);
-            }
         }
+        //Move a ready Process back to the ready queue and remove from the blocked queue
+        blockedQueue.removeIf(element ->
+        {
+            if(element.getBlockedTime() == 0)
+            {
+                readyQueue.add(element);
+                return true;
+            }
+            return false;
+        });
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION:
@@ -114,6 +146,7 @@ public class Scheduler
     {
         process.setBlockedTime(4);  //Process blocks for 4 time units
         process.addPageFault(timer);            //Add a Page Fault Time to the Process
+        System.out.println("PROCESS: " + process.getID() + " FAULT_TIMES: " + process.getFaultTimes());
         blockedQueue.add(process);              //Move the Process to the Blocked queue
         readyQueue.remove(process);
         memory.addPage(pageNeeded, process, timer, isGlobal);   //Allocate the Page to main memory
@@ -131,6 +164,7 @@ public class Scheduler
     //POST-CONDITION:
     public ArrayList<Process> getFinishedQueue()
     {
+        finishedQueue.sort(Comparator.comparingInt(p -> p.getID()));
         return finishedQueue;
     }
 }

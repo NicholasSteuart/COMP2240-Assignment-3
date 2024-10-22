@@ -26,14 +26,18 @@ public class A3
 
         // READ IN PROCESS FILES //
 
+        ArrayList<Integer> pageRequests = new ArrayList<>();
+
         for(int i = 2; i < args.length; i++)
         {
             File file = new File(args[i]);
+            String name = "";
+            int id = 0;
             try(Scanner sc = new Scanner(file))
             {
-                String name = "";
-                int id = 0;
-                ArrayList<Integer> pageRequests = new ArrayList<>();
+                name = "";
+                id = 0;
+                pageRequests = new ArrayList<>();
 
                 if(sc.hasNext("name:"))
                 {
@@ -53,24 +57,21 @@ public class A3
                         pageRequests.add(pageNumber);
                     }
                 }
-                processList1.add(new Process(name, id, pageRequests));
-                System.out.println(processList1.get(0).getPageRequests());
-                processList2.add(new Process(name, id, pageRequests));
-                System.out.println(processList2.get(0).getPageRequests());
-                pageRequests.clear();
                 sc.close();
             }
             catch(FileNotFoundException e)
             {
                 System.out.println("Incorrect Command Line Input.");
             }
+            processList1.add(new Process(name, id, pageRequests));
+            processList2.add(new Process(name, id, pageRequests));
         } 
 
         Scheduler scheduler1 = new Scheduler(processList1, timeSlice, new Memory(totalFrames), false);
         Scheduler scheduler2 = new Scheduler(processList2, timeSlice, new Memory(totalFrames), true);
 
-        scheduler1.run();
-        scheduler2.run();
+        //scheduler1.run();       //Static Allocation with Local Scope
+        scheduler2.run();       //Variable Allocation with Global Scope 
 
         System.out.println(printResults(scheduler1));
         System.out.println("----------------------------------------------------------\n");
@@ -84,7 +85,7 @@ public class A3
     public static String printResults(Scheduler scheduler)
     {
         String results = "";
-        String padding = "%-4s %-18s %-15s %-10s";
+        String padding = "%-4s %-18s %-15s %-9s %s";
 
         results = (scheduler.isGlobal()) ? "LRU - Variable-Global Replacement:\n" : "LRU - Fixed-Local Replacement:\n";
         results += "PID  Process Name       Turnaround Time # Faults  Fault Times\n";

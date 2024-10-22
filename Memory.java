@@ -80,13 +80,23 @@ public class Memory
     //POST-CONDITION: 
     public boolean isPageInMemory(int pageID, Process process, boolean isGlobal)
     {
+        System.out.println("MEMORY (IsPageInMemory)");
+        int count = 0;
+        for(Frame frame : frames)
+        {
+            System.out.println("Frame " + count + " : ID: " + frame.getPageID() + " OFFSET: " + " LRUTIME: " + frame.getLRUTime());
+            count++;
+        }
+        System.out.println("PAGEID: " + pageID + " PROCESS: " + process.getID());
         if(!isGlobal)   //Local Scope
         {
-            for(Frame frame : frames)
+            int mainMemPos = process.getOffset();
+            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
             {
-                if(frame.getPageID() == pageID && frame.getProcess() == process)    //Check if the Page is loaded in it's statically allocated Frames 
+                if(frames.get(i).getPageID() == pageID)
                 {
-                    return true;    //Page is loaded in Memory
+                    System.out.println("PAGE IS IN MEMORY");
+                    return true;
                 }
             }
         }
@@ -100,7 +110,7 @@ public class Memory
                 }
             }
         }
-
+        System.out.println("PAGE IS NOT IN MEMORY");
         return false; //Page Fault
     }
     //PRE-CONDITION: No pre-conditions
@@ -112,14 +122,18 @@ public class Memory
         if(!isGlobal)   //Local Scope
         {
             int mainMemPos = process.getOffset();   //Position in main memory where the first static Frame assigned to the Process is located
-
+            System.out.println("DEMAND PAGING | MAIN_MEM_POS: " + mainMemPos + " PAGEADDED: " + pageAdded);
+            System.out.println("MAX FRAMES: " + process.getMaxFrames());
             //Demand Paging for Static Allocation
-            for(int i = mainMemPos; i < process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
             {
+                System.out.println("i: " + i + " PAGE_ID: " + frames.get(i).getPageID());
                 if(frames.get(i).getPageID() == 0)
                 {
+                    System.out.println("Frame " + i + " : ID: " + frames.get(i).getPageID() + " PROCESS: " + frames.get(i).getProcess().getID() + " OFFSET: " + frames.get(i).getProcess().getOffset() +  " LRUTIME: " + frames.get(i).getLRUTime());
                     frames.get(i).setPageID(pageID);
                     frames.get(i).setLRUTime(time);
+                    System.out.println("Frame " + i + " : ID: " + frames.get(i).getPageID() + " PROCESS: " + frames.get(i).getProcess().getID() + " OFFSET: " + frames.get(i).getProcess().getOffset() +  " LRUTIME: " + frames.get(i).getLRUTime());
                     pageAdded = true;
                     break;
                 }
@@ -142,6 +156,7 @@ public class Memory
         //IF a page is required to be replaced
         if(!pageAdded)
         {
+            System.out.println("PAGE NEEDS TO BE REPLACED");
             lruReplacePage(process, pageID, isGlobal);
         }
     }
@@ -159,7 +174,7 @@ public class Memory
             int mainMemPos = process.getOffset();
             lruTime = frames.get(mainMemPos).getLRUTime();
 
-            for(int i = mainMemPos; i < process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
             {
                 if(frames.get(i).getLRUTime() < lruTime && frames.get(i).getLRUTime() != 0)
                 {
@@ -182,7 +197,7 @@ public class Memory
                 }
             }
         }
-        //Swap the LRU page out and the new page in. TODO: ASK NASIMUL ABOUT THIS
+        //Swap the LRU page out and the new page in.
         frames.get(lruPagePos).setPageID(pageID);
         frames.get(lruPagePos).setProcess(process);
     }
@@ -194,7 +209,7 @@ public class Memory
         {
             int mainMemPos = process.getOffset();
 
-            for(int i = mainMemPos; i < process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
             {
                 if(frames.get(i).getPageID() == pageID)
                 {
