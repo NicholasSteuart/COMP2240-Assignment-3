@@ -23,7 +23,6 @@ public class Process
     private int currentPagePos = 0;                             //The current position the Process is upto in the pageRequests
     private ArrayList<Integer> pageFaults = new ArrayList<>();  //List of Page Faults times that occur doing the Process's Lifetime
     private int offset;                                         //The position in the main memory where the frames assigned to the Process starts. Only used for Static Allocation
-    private int maxFrames;                                      //Total Frames allowed to be allocated to a Process. Only used for Static Allocation
     private int blockedTime = 0;                                //The time spent by the Process blocked
 
     // CONSTRUCTORS //
