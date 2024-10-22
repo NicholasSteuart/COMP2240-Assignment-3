@@ -74,7 +74,7 @@ public class A3
         scheduler2.run();       //Variable Allocation with Global Scope 
 
         System.out.println(printResults(scheduler1));
-        System.out.println("----------------------------------------------------------\n");
+        System.out.println("------------------------------------------------------------\n");
         System.out.println(printResults(scheduler2));
     }
 

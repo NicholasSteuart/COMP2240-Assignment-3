@@ -16,6 +16,7 @@ public class Memory
 
     private ArrayList<Frame> frames;    //The main memory
     private int totalFrames;            //The total amount of Frames in main memory
+    private int maxFrames;              //The maximum amount of Frames a Process can have. Used exclusively for Static Allocation
 
     // CONSTRUCTORS //
 
@@ -40,17 +41,14 @@ public class Memory
     //POST-CONDITION:
     public void allocateMemory(ArrayList<Process> processes, boolean isGlobal)
     {   
-        //The total amount of Frames allocatable to a Process based on scope 
-        int maxFrames = (!isGlobal) ? totalFrames / processes.size() : totalFrames;
-
-        //Assign Frames to Processes basd on scope
-        if(!isGlobal)   //Local Scope
+        //Assign Frames to Processes based on Resident Set Size Management
+        if(!isGlobal)   //Static Allocation
         {
+            maxFrames = totalFrames / processes.size();
             int offset = 0;          //The beginning position of the first static Frame in main memory that will be assigned to Process
             int mainMemPos = 0;      //Keeps track of the Frame position we are upto
             for(Process process : processes)
             {
-                process.setMaxFrames(maxFrames);    //Assign the Process the max Frames allowed to be assigned
                 process.setOffset(offset);          //Assign the current offset to the Process
 
                 for(int i = 0; i < maxFrames; i++)
@@ -62,17 +60,12 @@ public class Memory
                 offset = mainMemPos; //Update offset position
             }
         }
-        else    //Global Scope
+        else    //Variable Allocation
         {
             //Populate the Frame list 
-            for(int i = 0; i < maxFrames; i++)
+            for(int i = 0; i < totalFrames; i++)
             {
                 frames.add(new Frame());    
-            }
-            //Assign the Process the max Frames allowed to be assigned
-            for(Process process : processes)
-            {
-                process.setMaxFrames(maxFrames);
             }
         }
     }
@@ -88,10 +81,10 @@ public class Memory
             count++;
         }
         System.out.println("PAGEID: " + pageID + " PROCESS: " + process.getID());
-        if(!isGlobal)   //Local Scope
+        if(!isGlobal)   //Static Allocation
         {
             int mainMemPos = process.getOffset();
-            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
             {
                 if(frames.get(i).getPageID() == pageID)
                 {
@@ -100,11 +93,11 @@ public class Memory
                 }
             }
         }
-        else
+        else    //Variable Allocation: Since a Process can have a dynamic amount of frames, check all frames for the Frames allocated to the Process AND if amongst those allocated frames the Page required is loaded in
         {
             for(Frame frame : frames)
             {
-                if(frame.getPageID() == pageID) //Only need to check if globally the page is loaded in main memory
+                if(frame.getPageID() == pageID && frame.getProcess().getID() == process.getID()) 
                 {
                     return true;    //Page is loaded in Memory
                 }
@@ -119,13 +112,13 @@ public class Memory
     {
         boolean pageAdded = false;              //Stores whether or demand paging was successful or false if a page needs to be replaced
         
-        if(!isGlobal)   //Local Scope
+        if(!isGlobal)   //Static Allocation
         {
             int mainMemPos = process.getOffset();   //Position in main memory where the first static Frame assigned to the Process is located
             System.out.println("DEMAND PAGING | MAIN_MEM_POS: " + mainMemPos + " PAGEADDED: " + pageAdded);
-            System.out.println("MAX FRAMES: " + process.getMaxFrames());
+            System.out.println("MAX FRAMES: " + maxFrames);
             //Demand Paging for Static Allocation
-            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
             {
                 System.out.println("i: " + i + " PAGE_ID: " + frames.get(i).getPageID());
                 if(frames.get(i).getPageID() == 0)
@@ -139,13 +132,14 @@ public class Memory
                 }
             }
         }
-        else    //Global Scope
+        else    //Variable Allocation
         {
             for(Frame frame : frames)
             {
                 if(frame.getPageID() == 0)
                 {
                     frame.setPageID(pageID);
+                    frame.setProcess(process);
                     frame.setLRUTime(time);
                     pageAdded = true;
                     break;
@@ -174,7 +168,7 @@ public class Memory
             int mainMemPos = process.getOffset();
             lruTime = frames.get(mainMemPos).getLRUTime();
 
-            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
             {
                 if(frames.get(i).getLRUTime() < lruTime && frames.get(i).getLRUTime() != 0)
                 {
@@ -200,6 +194,7 @@ public class Memory
         //Swap the LRU page out and the new page in.
         frames.get(lruPagePos).setPageID(pageID);
         frames.get(lruPagePos).setProcess(process);
+        frames.get(lruPagePos).setLRUTime(0);
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION:
@@ -209,7 +204,7 @@ public class Memory
         {
             int mainMemPos = process.getOffset();
 
-            for(int i = mainMemPos; i < mainMemPos + process.getMaxFrames(); i++)
+            for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
             {
                 if(frames.get(i).getPageID() == pageID)
                 {

@@ -95,12 +95,6 @@ public class Process
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public void setMaxFrames(int maxFrames)
-    {
-        this.maxFrames = maxFrames;
-    }
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
     public void setBlockedTime(int blockedTime)
     {
         this.blockedTime = blockedTime;
@@ -167,12 +161,6 @@ public class Process
     public int getOffset()
     {
         return offset;
-    }
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
-    public int getMaxFrames()
-    {
-        return maxFrames;
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
