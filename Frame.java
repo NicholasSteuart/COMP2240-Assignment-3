@@ -1,4 +1,5 @@
 /* 
+    * COMP2240 Assignment 3
     * File: Frame.java
     * Author: Nicholas Steuart c3330826
     * Date Created: 14/10/24

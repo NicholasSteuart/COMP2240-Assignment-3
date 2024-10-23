@@ -1,4 +1,5 @@
 /* 
+    * COMP2240 Assignment 3
     * File: Memory.java
     * Author: Nicholas Steuart c3330826
     * Date Created: 14/10/24
@@ -168,7 +169,6 @@ public class Memory
             lruReplacePage(pageID, process, time, isGlobal);
         }
     }
-
     //PRE-CONDITION: 
         //Parameter pageID must be greater than zero
         //Parameter process cannot be null
@@ -219,70 +219,49 @@ public class Memory
         //Parameter pageID must be greater than zero
         //Parameter process cannot be null
         //Parameter time must be a non-negative Integer
-        //Parameter isGlobal is either:
-            //True IF Variable Allocation with Global Replacement Scope
-            //False IF Static Allocation with Local Replacement Scope
-    //POST-CONDITION: The Page parsed in has it's lru time updated to time
-    public void updateLRUTime(int pageID, Process process, int time, boolean isGlobal)
-    {
-        if(!isGlobal)   //Static Allocation: 
-        {
-            mainMemPos = process.getOffset();
-
-            for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
-            {
-                if(frames.get(i).getPageID() == pageID)
-                {
-                    frames.get(i).setLRUTime(time);
-                    break;
-                }
-            }
-        }
-        else    //Global Scope
-        {
-            for(Frame frame : frames)
-            {
-                if(frame.getProcess() == null)
-                {
-                    continue;
-                }
-                if(frame.getPageID() == pageID && frame.getProcess().getID() == process.getID())
-                {
-                    frame.setLRUTime(time);
-                }
-            }
-        }
-    }
-
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION: 
-    public void reallocateMemory(Process process)
+    //POST-CONDITION: The Page parsed in has it's lru time updated to time (Scope is not required as we can just find the Frame that has the Page loaded)
+    public void updateLRUTime(int pageID, Process process, int time)
     {
         for(Frame frame : frames)
         {
-            if(frame.getProcess() == null)
-            {
-                continue;
-            }
+            //IF the Frame has not been allocated yet
+            if(frame.getProcess() == null) continue;
+
+            //IF the frame holds the Page we are after
+            if(frame.getPageID() == pageID && frame.getProcess().getID() == process.getID()) frame.setLRUTime(time); //Update the lru time to time
+        }
+    }
+    //PRE-CONDITION: Parameter process cannot be null
+    //POST-CONDITION: All Frames allocated to the Process are deallocated and reset to default values
+    public void reallocateMemory(Process process)
+    {
+        //Reset all Frames that are allocated to the finished Process
+        for(Frame frame : frames)
+        {
+            //IF the Frame has not been allocated yet
+            if(frame.getProcess() == null) continue;
+
+            //IF the Frame is allocated to the Finished Process
             if(frame.getProcess().getID() == process.getID())
             {
+                //Reset Frame to default values
                 frame.setPageID(0);
                 frame.setProcess(null);
-                frame.setLRUTime(0);
+                frame.setLRUTime(-1);
             }
         }
     }
 
     // ACCESSORS //
 
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION:
+    //PRE-CONDITION: Memory Constructor instantiated and frames cannot be null
+    //POST-CONDITION: Class variable frames returned
     public ArrayList<Frame> getFrames()
     {
         return frames;
     }
-    //PRE-CONDITION: No pre-conditions
-    //POST-CONDITION:
+    //PRE-CONDITION: Memory Constructor instantiated and totalFrames must be greater than zero
+    //POST-CONDITION: Class variable totalFrames returned
     public int getTotalFrames()
     {
         return totalFrames;
