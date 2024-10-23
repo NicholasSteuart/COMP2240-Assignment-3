@@ -76,7 +76,7 @@ public class Scheduler
                     }
                     else    //Process executes 1 unit of it's time slice
                     {
-                        memory.updateLRUTime(runningProcess, pageNeeded, timer, isGlobal);
+                        memory.updateLRUTime(pageNeeded, runningProcess, timer, isGlobal);
                         timer++;                                                            //Increase time
                         checkBlocked();                                                     //Check to see if a Process has become unblocked
                         //Check to see if the running Process has finished 
