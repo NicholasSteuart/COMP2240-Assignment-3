@@ -1,7 +1,7 @@
 /* File: Memory.java
 * Author: Nicholas Steuart c3330826
 * Date Created: 14/10/24
-* Date Last Modified: 14/10/24
+* Date Last Modified: 23/10/24
 * Description: Simulates main memory in a computing environment. 
 * Contains implementation of the 2 LRU Replacement algorithms required by the assignment
 */
@@ -73,14 +73,6 @@ public class Memory
     //POST-CONDITION: 
     public boolean isPageInMemory(int pageID, Process process, boolean isGlobal)
     {
-        System.out.println("MEMORY (IsPageInMemory)");
-        int count = 0;
-        for(Frame frame : frames)
-        {
-            System.out.println("Frame " + count + " : ID: " + frame.getPageID() + " OFFSET: " + " LRUTIME: " + frame.getLRUTime());
-            count++;
-        }
-        System.out.println("PAGEID: " + pageID + " PROCESS: " + process.getID());
         if(!isGlobal)   //Static Allocation
         {
             int mainMemPos = process.getOffset();
@@ -88,7 +80,6 @@ public class Memory
             {
                 if(frames.get(i).getPageID() == pageID)
                 {
-                    System.out.println("PAGE IS IN MEMORY");
                     return true;
                 }
             }
@@ -103,7 +94,7 @@ public class Memory
                 }
             }
         }
-        System.out.println("PAGE IS NOT IN MEMORY");
+
         return false; //Page Fault
     }
     //PRE-CONDITION: No pre-conditions
@@ -115,18 +106,13 @@ public class Memory
         if(!isGlobal)   //Static Allocation
         {
             int mainMemPos = process.getOffset();   //Position in main memory where the first static Frame assigned to the Process is located
-            System.out.println("DEMAND PAGING | MAIN_MEM_POS: " + mainMemPos + " PAGEADDED: " + pageAdded);
-            System.out.println("MAX FRAMES: " + maxFrames);
             //Demand Paging for Static Allocation
             for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
             {
-                System.out.println("i: " + i + " PAGE_ID: " + frames.get(i).getPageID());
                 if(frames.get(i).getPageID() == 0)
                 {
-                    System.out.println("Frame " + i + " : ID: " + frames.get(i).getPageID() + " PROCESS: " + frames.get(i).getProcess().getID() + " OFFSET: " + frames.get(i).getProcess().getOffset() +  " LRUTIME: " + frames.get(i).getLRUTime());
                     frames.get(i).setPageID(pageID);
                     frames.get(i).setLRUTime(time);
-                    System.out.println("Frame " + i + " : ID: " + frames.get(i).getPageID() + " PROCESS: " + frames.get(i).getProcess().getID() + " OFFSET: " + frames.get(i).getProcess().getOffset() +  " LRUTIME: " + frames.get(i).getLRUTime());
                     pageAdded = true;
                     break;
                 }
@@ -150,23 +136,21 @@ public class Memory
         //IF a page is required to be replaced
         if(!pageAdded)
         {
-            System.out.println("PAGE NEEDS TO BE REPLACED");
-            lruReplacePage(process, pageID, isGlobal);
+            lruReplacePage(process, pageID, time, isGlobal);
         }
     }
 
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION: 
-    public void lruReplacePage(Process process, int pageID, boolean isGlobal)
+    public void lruReplacePage(Process process, int pageID, int time, boolean isGlobal)
     {
-        int lruTime; //Stores the least recently used Frame time
+        int lruTime = Integer.MAX_VALUE;                     //Stores the least recently used Frame time
         int lruPagePos = 0;              //Stores the position of the least recently used Page in main memory
 
         //Find Least Recently Used Page in Main Memory 
         if(!isGlobal)   //Check frames allocated to the Process for a replacement (Local Scope)
         {
             int mainMemPos = process.getOffset();
-            lruTime = frames.get(mainMemPos).getLRUTime();
 
             for(int i = mainMemPos; i < mainMemPos + maxFrames; i++)
             {
@@ -180,8 +164,6 @@ public class Memory
         }
         else    //Check all frames for potential replacement (Global scope)
         {
-            lruTime = Integer.MAX_VALUE;
-
             for(Frame frame : frames)
             {
                 if(frame.getLRUTime() < lruTime && frame.getLRUTime() != 0)
@@ -194,7 +176,7 @@ public class Memory
         //Swap the LRU page out and the new page in.
         frames.get(lruPagePos).setPageID(pageID);
         frames.get(lruPagePos).setProcess(process);
-        frames.get(lruPagePos).setLRUTime(0);
+        frames.get(lruPagePos).setLRUTime(time);
     }
     //PRE-CONDITION: No pre-conditions
     //POST-CONDITION:
@@ -217,10 +199,33 @@ public class Memory
         {
             for(Frame frame : frames)
             {
-                if(frame.getPageID() == pageID)
+                if(frame.getProcess() == null)
+                {
+                    continue;
+                }
+                if(frame.getPageID() == pageID && frame.getProcess().getID() == process.getID())
                 {
                     frame.setLRUTime(time);
                 }
+            }
+        }
+    }
+
+    //PRE-CONDITION: No pre-conditions
+    //POST-CONDITION: 
+    public void reallocateMemory(Process process)
+    {
+        for(Frame frame : frames)
+        {
+            if(frame.getProcess() == null)
+            {
+                continue;
+            }
+            if(frame.getProcess().getID() == process.getID())
+            {
+                frame.setPageID(0);
+                frame.setProcess(null);
+                frame.setLRUTime(0);
             }
         }
     }

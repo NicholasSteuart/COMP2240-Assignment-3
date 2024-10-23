@@ -1,7 +1,7 @@
 /* File: Process.java
 * Author: Nicholas Steuart c3330826
 * Date Created: 14/10/24
-* Date Last Modified: 14/10/24
+* Date Last Modified: 23/10/24
 * Description: The Process class represents a process in a CPU scheduling simulation. 
 * Each process contains essential information that is used by various 
 * CPU scheduling algorithms to manage and prioritize execution order.

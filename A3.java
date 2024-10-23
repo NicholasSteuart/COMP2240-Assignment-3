@@ -2,7 +2,7 @@
  * File: A3.java
  * Author: Nicholas Steuart c3330826
  * Date Created: 27/9/24
- * Date Last Modified: 27/9/24
+ * Date Last Modified: 23/10/24
  * Description: MAIN file. Input and Output for Assignment 3
  */
 
@@ -70,7 +70,7 @@ public class A3
         Scheduler scheduler1 = new Scheduler(processList1, timeSlice, new Memory(totalFrames), false);
         Scheduler scheduler2 = new Scheduler(processList2, timeSlice, new Memory(totalFrames), true);
 
-        //scheduler1.run();       //Static Allocation with Local Scope
+        scheduler1.run();       //Static Allocation with Local Scope
         scheduler2.run();       //Variable Allocation with Global Scope 
 
         System.out.println(printResults(scheduler1));

@@ -1,7 +1,7 @@
 /* File: Frame.java
 * Author: Nicholas Steuart c3330826
 * Date Created: 14/10/24
-* Date Last Modified: 14/10/24
+* Date Last Modified: 23/10/24
 * Description: Implementation of a Frame in Memory
 */
 public class Frame
