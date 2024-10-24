@@ -65,13 +65,16 @@ public class A3
                         pageRequests.add(pageNumber);       //Add the Page to pageRequests list
                     }
                 }
-
+                if(pageRequests.size() > 50)
+                {
+                    throw new Exception("ERROR: A Process is only allowed to have a maximum of 50 pages");
+                }
+                
                 sc.close(); //Close Scanner for the File
-                //TODO: ASK NASIMUL ABOUT THE MAX 50 PAGE STIPULATION IN THE ASSIGNMENT SPECIFICATIONS
             }
             catch(FileNotFoundException e)
             {
-                System.out.println("Incorrect Command Line Input. Command Line Arguments must be of the Form: java A3 F Q data1 data2 ... datan");
+                System.out.println("ERROR: Incorrect Command Line Input. Command Line Arguments must be of the Form: java A3 F Q data1 data2 ... datan");
             }
 
             //Add the Process data as a deep copy to each list
