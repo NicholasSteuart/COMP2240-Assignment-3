@@ -3,7 +3,7 @@
     * File: Frame.java
     * Author: Nicholas Steuart c3330826
     * Date Created: 14/10/24
-    * Date Last Modified: 23/10/24
+    * Date Last Modified: 24/10/24
     * Description: Implements the design and functionality of a Frame in main memory
 */
 public class Frame

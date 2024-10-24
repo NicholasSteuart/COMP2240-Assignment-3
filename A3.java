@@ -3,7 +3,7 @@
     * File: A3.java
     * Author: Nicholas Steuart c3330826
     * Date Created: 27/9/24
-    * Date Last Modified: 23/10/24
+    * Date Last Modified: 24/10/24
     * Description: MAIN file: Reads in the command line arguments specified in the Assignment specifications and Outputs the Summary of the simulation 
 */
 
@@ -104,11 +104,15 @@ public class A3
     //POST-CONDITION: String results returned containing the formatted summary of scheduler
     public static String printResults(Scheduler scheduler)
     {
-        String results = "";                            //Stores the Summary results that will be returned
-        String padding = "%-4s %-18s %-15s %-9s %s";    //Padding of the Process data, in line with the Assignment Specifications
+        //Variable results: Stores the Summary results that will be returned
+        //Determines the heading of the scheduler's summary, based on the replacement strategy. The heading is then concatenated to results
+        String results = (scheduler.isGlobal()) ? "LRU - Variable-Global Replacement:\n" : "LRU - Fixed-Local Replacement:\n"; 
+        
+        //The column headings of the Process data concatenated to results
+        results += "PID  Process Name       Turnaround Time # Faults  Fault Times\n"; 
 
-        results = (scheduler.isGlobal()) ? "LRU - Variable-Global Replacement:\n" : "LRU - Fixed-Local Replacement:\n"; //Determines the heading of the scheduler's summary, based on the replacement strategy. The heading is then concatenated to results
-        results += "PID  Process Name       Turnaround Time # Faults  Fault Times\n";                                   //The column headings of the Process data concatenated to results
+        //Padding of the Process data, in line with the Assignment Specifications
+        String padding = "%-4s %-18s %-15s %-9s %s";  
 
         //Concatenates the Process data required in the summary (formatted by padding)
         for(Process process : scheduler.getFinishedQueue())
