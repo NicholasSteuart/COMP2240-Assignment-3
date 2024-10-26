@@ -109,10 +109,10 @@ public class A3
         String results = (scheduler.isGlobal()) ? "LRU - Variable-Global Replacement:\n" : "LRU - Fixed-Local Replacement:\n"; 
         
         //The column headings of the Process data concatenated to results
-        results += "PID  Process Name       Turnaround Time # Faults  Fault Times\n"; 
+        results += "PID  Process Name      Turnaround Time  # Faults  Fault Times\n"; 
 
         //Padding of the Process data, in line with the Assignment Specifications
-        String padding = "%-4s %-18s %-15s %-9s %s";  
+        String padding = "%-4s %-17s %-16s %-9s %s";  
 
         //Concatenates the Process data required in the summary (formatted by padding)
         for(Process process : scheduler.getFinishedQueue())
